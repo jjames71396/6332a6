@@ -24,14 +24,12 @@ min_pickup = 1
 max_pickup = 3
 players = {}
 
-current_player = None
 
-#document = {"name": "game_state",'started': False,'p1': '','p2': '','turn': 1,'pile_sizes': pile_sizes, 'min_pickup': min_pickup, 'max_pickup': max_pickup}
-#inserted_document = collection.update_one({'name':'game_state'},{'$set': document})
+document = {"name": "game_state",'started': False,'p1': '','p2': '','turn': 1,'pile_sizes': pile_sizes, 'min_pickup': min_pickup, 'max_pickup': max_pickup}
+inserted_document = collection.update_one({'name':'game_state'},{'$set': document})
 
 @app.route('/')
 def index():
-    global current_player
     query = {"name": "game_state"} 
     game_state = collection.find_one(query)
     # Retrieve the game state from the database
@@ -39,22 +37,20 @@ def index():
     turn = None
     cur_player = None
     p = players
-    if current_player is None:
+    if game_state["p1"] == '':
+        game_state = None
+        p = None
+    elif game_state["p2"] == '':
         game_state = None
         p = None
     elif not game_state['started']:
         game_state = None
     else:
-        print(current_player)
         pile_sizes = game_state['pile_sizes']
-        if game_state['turn'] == current_player:
-            turn = True
-            if current_player == 1:
-                cur_player = game_state['p1']
-            else:
-                cur_player = game_state['p2']
+        if game_state['turn'] == 1:
+            cur_player = game_state['p1']
         else:
-            turn = False
+            cur_player = game_state['p2']
             
         
     # Render the template with the game state and player names
@@ -62,7 +58,6 @@ def index():
 
 @app.route('/players', methods=['POST'])
 def players():
-    global current_player
     query = {"name": "game_state"} 
     game_state = collection.find_one(query)
     if game_state['p1'] == '':
@@ -75,18 +70,16 @@ def players():
     if player1 is not None and player1 != '':
         document = {'p1': player1}
         inserted_document = collection.update_one(query,{'$set': document})
-        current_player = 1
     elif player2 is not None and player2 != '':
         document = {'p2': player2}
         inserted_document = collection.update_one(query,{'$set': document})
-        current_player = 2
-    print(current_player)
     # Redirect back to the index page
     return index()
 
 @app.route('/pick', methods=['POST'])
 def pick():
-    global current_player
+    query = {"name": "game_state"} 
+    game_state = collection.find_one(query)
     pile_number = int(request.form['pile_number']) - 1
     num_stones = int(request.form['num_stones'])
     if pile_number < 0:
@@ -95,13 +88,10 @@ def pick():
         pile_number = 2
     # Update the game state
     pile_sizes[pile_number] -= num_stones
-    players[current_player] += num_stones
+    players[game_state['turn']] += num_stones
 
     # Switch players
-    
-    #current_player = 3 - current_player
-    query = {"name": "game_state"}
-    if current_player == 1:
+    if game_state['turn'] == 1:
         document = {'turn': 2}
         inserted_document = collection.update_one(query,{'$set': document})
     else:
