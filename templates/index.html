@@ -22,7 +22,7 @@
             <h2>Current Player: Player {{ current_player }}</h2>
             <form action="/pick" method="POST">
                 <label for="pile_number">Pile Number:</label>
-                <input type="number" name="pile_number" min="0" max="2" required><br><br>
+                <input type="number" name="pile_number" min="1" max="3" required><br><br>
                 <label for="num_stones">Number of Stones to Pick:</label>
                 <input type="number" name="num_stones" min="{{ game_state.min_pickup }}" max="{{ game_state.max_pickup }}" required><br><br>
                 <input type="submit" value="Pick Stones">
