@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multi-User Game</title>
+</head>
+<body>
+    <h1>Multi-User Game</h1>
+    {% if game_state %}
+        <h2>Game State:</h2>
+        <ul>
+            <li>Pile 1: {{ game_state.pile_sizes[0] }}</li>
+            <li>Pile 2: {{ game_state.pile_sizes[1] }}</li>
+            <li>Pile 3: {{ game_state.pile_sizes[2] }}</li>
+        </ul>
+        {% if players %}
+            <h2>Player Scores:</h2>
+            {% for player_id, score in players.items() %}
+                <p>Player {{ player_id }}: {{ score }}</p>
+            {% endfor %}
+        {% endif %}
+        {% if current_player %}
+            <h2>Current Player: Player {{ current_player }}</h2>
+            <form action="/pick" method="POST">
+                <label for="pile_number">Pile Number:</label>
+                <input type="number" name="pile_number" min="0" max="2" required><br><br>
+                <label for="num_stones">Number of Stones to Pick:</label>
+                <input type="number" name="num_stones" min="{{ game_state.min_pickup }}" max="{{ game_state.max_pickup }}" required><br><br>
+                <input type="submit" value="Pick Stones">
+            </form>
+        {% endif %}
+	
+    {% elif players %}
+        <h2>Enter Game Parameters:</h2>
+        <form action="/start" method="POST">
+            <label for="pile1">Pile 1:</label>
+            <input type="number" name="pile1" required><br><br>
+            <label for="pile2">Pile 2:</label>
+            <input type="number" name="pile2" required><br><br>
+            <label for="pile3">Pile 3:</label>
+            <input type="number" name="pile3" required><br><br>
+            <label for="min_pickup">Minimum Stone Pickup:</label>
+            <input type="number" name="min_pickup" required><br><br>
+            <label for="max_pickup">Maximum Stone Pickup:</label>
+            <input type="number" name="max_pickup" required><br><br>
+            <input type="submit" value="Start Game">
+        </form>
+	{% else %}
+        <h2>Enter Player Name:</h2>
+        <form action="/players" method="POST">
+            <label for="pile1">Player 1:</label>
+            <input type="text" name="player1"><br><br>
+            <label for="pile2">Player 2:</label>
+            <input type="text" name="player2"><br><br>
+			<input type="submit" value="enter">
+        </form>
+    {% endif %}
+</body>
+</html>
