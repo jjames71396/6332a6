@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request
 from pymongo import MongoClient
-import time
 
 #from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -99,12 +98,7 @@ def pick():
     else:
         document = {'turn': 1}
     inserted_document = collection.update_one(query,{'$set': document})
-    while True:
-        time.sleep(1)
-        new_game_state = collection.find_one(query)
-        #force player to wait for other player
-        if game_state['turn'] == new_game_state['turn']:
-            break
+    
     # Redirect back to the index page
     return index()
 
